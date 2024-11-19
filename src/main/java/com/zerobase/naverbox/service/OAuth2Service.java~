@@ -1,0 +1,51 @@
+package com.zerobase.naverbox.service;
+
+import com.zerobase.naverbox.dto.GoogleResponse;
+import com.zerobase.naverbox.dto.NaverResponse;
+import com.zerobase.naverbox.dto.OAuth2Response;
+import com.zerobase.naverbox.entity.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class OAuth2Service extends DefaultOAuth2UserService{
+
+    private final SecurityService securityService;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+        
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        OAuth2Response oAuth2Response = null;
+        if (registrationId.equals("naver")) {
+
+            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+        }
+        else if (registrationId.equals("google")) {
+
+            oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+        }
+        else {
+
+            return null;
+        }
+
+        //추후 작성
+    }
+}

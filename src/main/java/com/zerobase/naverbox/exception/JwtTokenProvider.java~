@@ -1,0 +1,73 @@
+package com.zerobase.naverbox.jwt;
+
+import com.zerobase.naverbox.dto.UserDTO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
+
+@RequiredArgsConstructor
+@Service
+public class JwtTokenProvider {
+    private final JwtProperties jwtProperties;
+
+    public String generatedToken(UserDTO userDTO, Duration expiration) {
+        Date now = new Date();
+        return makeToken(new Date(now.getTime() + expiration.toMillis()), userDTO);
+    }
+
+    //Token 생성
+    private String makeToken(Date expiration, UserDTO userDTO) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(userDTO.getUserId())
+                .setExpiration(expiration)
+                .setIssuedAt(now)
+                .signWith(jwtProperties.getKey())
+                .compact();
+    }
+
+    //Jwt 토큰 유효성 검사
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(jwtProperties.getKey())
+                    .build()
+                    .parse(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    //토큰기반 인증정보 가져오는 메서드
+    public Authentication getAuthentication(String token) {
+        Claims claims = getClaims(token);
+        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("USER"));
+
+        return new UsernamePasswordAuthenticationToken(new User(claims.getSubject(), "", authorities), token, authorities);
+    }
+    
+    //토큰기반 유저아이디 가져오는 메서드
+    public Long getUserId(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("id", Long.class);
+    }
+
+    //클레임 조회 메서드
+    private Claims getClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(jwtProperties.getKey())
+                .parseClaimsJws(token)
+                .getBody();
+    }
+}

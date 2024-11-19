@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: naverBox
+  profiles:
+    include: oauth2
+
+  dataSource:
+    url: jdbc:mariadb://203.245.29.238:3306/naver_box?characterEncoding=UTF-8&serverTimezone=UTC
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: smart
+    password: smart@1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /naverBox
+
+logging:
+  level:
+    org.hibernate:
+      type.descriptor.sql : trace
+      SQL: debug

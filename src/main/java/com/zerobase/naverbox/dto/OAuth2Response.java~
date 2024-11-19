@@ -1,0 +1,11 @@
+package com.zerobase.naverbox.dto;
+
+
+public interface OAuth2Response {
+
+    //제공자
+    String getProvider();
+    String getProviderId();
+    String getName();
+    String getEmail();
+}
