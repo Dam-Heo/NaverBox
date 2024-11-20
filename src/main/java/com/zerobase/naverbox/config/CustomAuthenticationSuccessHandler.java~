@@ -1,4 +1,0 @@
-package com.zerobase.naverbox.security;
-
-public class CustomAuthenticationSuccessHandler {
-}
