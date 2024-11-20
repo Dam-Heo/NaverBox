@@ -1,2 +1,0 @@
-package com.zerobase.naverbox.dto;public record UserGetResponseDTO() {
-}
