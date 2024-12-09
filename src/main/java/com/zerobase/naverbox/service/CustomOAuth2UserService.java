@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -22,6 +25,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
     //http://localhost:8080/login/oauth2/code/서비스명
 
     @Override
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -44,13 +48,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
         User existData = userRepository.findByUserId(userId);
 
         if (existData == null) {
-
-            User user = new User();
-            user.setUserId(userId);
-            user.setEmail(oAuth2Response.getEmail());
-            user.setSnsType(oAuth2Response.getProvider());
-            user.setName(oAuth2Response.getName());
-            user.setUserRole(UserRole.valueOf("USER"));
+            User user = User.builder()
+                    .userId(userId)
+                    .email(oAuth2Response.getEmail())
+                    .snsType(oAuth2Response.getProvider())
+                    .name(oAuth2Response.getName())
+                    .userRole(UserRole.valueOf("USER"))
+                    .build();
 
             userRepository.save(user);
 
@@ -65,8 +69,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
             existData.setEmail(oAuth2Response.getEmail());
             existData.setName(oAuth2Response.getName());
+            existData.setUpdateAt(LocalDateTime.now());
 
-            userRepository.save(existData);
 
             UserDTO userDTO = new UserDTO();
             userDTO.setUserId(existData.getUserId());
