@@ -20,11 +20,21 @@ spring:
 
 server:
   port: 8080
-  servlet:
-    context-path: /naverBox
+#  servlet:
+#    context-path: /naverBox
 
 logging:
   level:
     org.hibernate:
       type.descriptor.sql : trace
       SQL: debug
+
+# file upload
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1GB
+      max-request-size: 1GB
+
+file:
+  upload-dir: C:/uploadFile

@@ -40,7 +40,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             //형식, 길이 에러
             request.setAttribute("exception", Code.WRONG_TYPE_TOKEN.getCode());
         }
-        filterChain.doFilter(request, response);
+//        filterChain.doFilter(request, response);
 
 
     }

@@ -5,8 +5,6 @@ import com.zerobase.naverbox.filter.JwtExceptionFilter;
 import com.zerobase.naverbox.filter.JwtFilter;
 import com.zerobase.naverbox.handler.CustomOAuth2SuccessHandler;
 import com.zerobase.naverbox.service.CustomOAuth2UserService;
-import com.zerobase.naverbox.service.JwtService;
-import com.zerobase.naverbox.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,7 +36,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+//    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     private final UserDetailsService userDetailsService;
 
@@ -77,27 +74,27 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2SuccessHandler customOAuth2SuccessHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                new AntPathRequestMatcher("/signup", "POST"),
-                                new AntPathRequestMatcher("/login", "POST")
+                                new AntPathRequestMatcher("/**" )
+//                                new AntPathRequestMatcher("/success")
                         ).permitAll()
                         .anyRequest().authenticated()
                 ).sessionManagement(sessionManagement -> sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                ).exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtFilter.class)
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                        .userService(customOAuth2UserService))
-                        .successHandler(customOAuth2SuccessHandler));
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//                ).exceptionHandling(exceptionHandling -> exceptionHandling
+//                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(jwtExceptionFilter, JwtFilter.class);
+//                .oauth2Login(oauth2 -> oauth2
+//                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+//                        .userService(customOAuth2UserService))
+//                        .successHandler(customOAuth2SuccessHandler));
 
 
         return http.build();

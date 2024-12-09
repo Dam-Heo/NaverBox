@@ -6,11 +6,11 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_tb")
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_pk")
     private Long id;
 
     @Column(name = "user_id", unique = true, nullable = false)
@@ -31,6 +32,9 @@ public class User{
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "sum_file_size")
+    private long sumFileSize;
 
     @Column(name = "user_role")
     @Enumerated(EnumType.STRING)
@@ -46,6 +50,7 @@ public class User{
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
+
     
     @Builder
     public User(String userId, String password, String email, String name, UserRole userRole, String refreshToken, String snsType) {
