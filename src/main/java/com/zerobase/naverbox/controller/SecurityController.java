@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class SecurityController {
 
@@ -34,7 +35,11 @@ public class SecurityController {
             return new ResponseEntity(bindingResult.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
         }
         User userEntity = securityService.findByUserId(user.getUserId());
-        if(!securityService.passwordChk(user.getUserId(), user.getPassword())) {
+        if(userEntity==null){
+            return new ResponseEntity("사용자가 존재하지 않습니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        if(!securityService.passwordChk(userEntity.getUserId(), user.getPassword())) {
             return new ResponseEntity("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
         }
 
@@ -60,12 +65,6 @@ public class SecurityController {
     public ResponseEntity logout(@RequestHeader("Authorization") String token) {
         // token repository에서 refresh Token에 해당하는 값을 삭제한다.
         return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity test(@RequestHeader("Authorization") String token) {
-        String userId = jwtService.extractUserId(token);
-        return new ResponseEntity(jwtService.extractUserId(token), HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
