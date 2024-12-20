@@ -8,9 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,8 +19,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +50,6 @@ public class FileService {
                     .fileFolderDiv(1)
                     .filePath(filePath + "/" + userId)
                     .fileStatus(1)
-                    .insert_dt(LocalDateTime.now())
                     .fileName(user.get().getUserId())
                     .user(user.get())
                     .build();
@@ -98,24 +96,20 @@ public class FileService {
         }
     }
 
-    //파일 리스트 조회
-    @Transactional(readOnly = true)
-    public List<File> findAll() {
-        return fileRepository.findAll();
-    }
-
     //파일 ID로 조회
-    @Transactional(readOnly = true)
     public File findById(Long id) {
         return fileRepository.findById(id).orElse(null);
     }
 
-    @Transactional
     public void deleteById(Long id) {
         try {
             fileRepository.deleteById(id);
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Page<File> findAllByUser_IdOrderByInsertDtDesc(Pageable pageable, Long id) {
+        return fileRepository.findAllByUser_IdOrderByInsertDtDesc(pageable, id);
     }
 }

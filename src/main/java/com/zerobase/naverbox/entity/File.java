@@ -44,7 +44,7 @@ public class File {
     private String filePath;
 
     @Column(name = "file_upload_dt", nullable = false)
-    private LocalDateTime insert_dt;
+    private LocalDateTime insertDt;
 
     private LocalDateTime createAt;
 
@@ -57,7 +57,7 @@ public class File {
     private User user;
 
     @Builder
-    public File(Long id, Long upFilePk, int fileFolderDiv, int fileStatus, int partitionNo, String fileName, String fileExt, long fileSize, String filePath, LocalDateTime insert_dt, User user) {
+    public File(Long id, Long upFilePk, int fileFolderDiv, int fileStatus, int partitionNo, String fileName, String fileExt, long fileSize, String filePath,  User user) {
         this.id = id;
         this.upFilePk = upFilePk;
         this.fileFolderDiv = fileFolderDiv;
@@ -67,7 +67,7 @@ public class File {
         this.fileExt = fileExt;
         this.fileSize = fileSize;
         this.filePath = filePath;
-        this.insert_dt = insert_dt;
+        this.insertDt = LocalDateTime.now();
         this.createAt = LocalDateTime.now();
         this.user = user;
     }

@@ -4,7 +4,10 @@ import com.zerobase.naverbox.dto.UserLoginDTO;
 import com.zerobase.naverbox.entity.User;
 import com.zerobase.naverbox.service.JwtService;
 import com.zerobase.naverbox.service.SecurityService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class SecurityController {
 
@@ -58,7 +61,12 @@ public class SecurityController {
         String userId = jwtService.extractUserId(accessToken);
 
         userLoginDTO = UserLoginDTO.builder().userId(userId).accessToken(accessToken).refreshToken(refreshToken).build();
-        return new ResponseEntity(userLoginDTO, HttpStatus.OK);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", accessToken);
+        headers.add("Authorization-refresh", refreshToken);
+
+        return ResponseEntity.ok().headers(headers).body("success");
     }
 
     @DeleteMapping("/logout")
