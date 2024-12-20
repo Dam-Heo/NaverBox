@@ -1,6 +1,5 @@
 package com.zerobase.naverbox.service;
 
-import com.zerobase.naverbox.dto.UserDTO;
 import com.zerobase.naverbox.dto.UserLoginDTO;
 import com.zerobase.naverbox.entity.User;
 import com.zerobase.naverbox.repository.UserRepository;
@@ -9,13 +8,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,10 +51,10 @@ public class SecurityService{
     }
 
     //RefreshToken 저장
-    @Transactional
     public void saveRefreshToken(User getUser) {
         User user = userRepository.findByUserId(getUser.getUserId());
         user.setRefreshToken(getUser.getRefreshToken());
+        userRepository.save(user);
     }
 
     //AccessToken 재발급
@@ -77,7 +72,8 @@ public class SecurityService{
     }
 
     public UserLoginDTO verify(User user) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserId(), user.getPassword()));
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getUserId(), user.getPassword());
+        Authentication authentication = authenticationManager.authenticate(token);
         if(user.getSnsType()!=null){
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUserId(), null));
         }

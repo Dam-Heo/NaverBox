@@ -2,14 +2,21 @@ package com.zerobase.naverbox.controller;
 
 import com.zerobase.naverbox.dto.FileDTO;
 import com.zerobase.naverbox.entity.File;
+import com.zerobase.naverbox.entity.User;
 import com.zerobase.naverbox.service.FileService;
+import com.zerobase.naverbox.service.SecurityService;
+import com.zerobase.naverbox.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,13 +29,20 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/file")
 public class FileController {
 
     private final FileService fileService;
+    private final SecurityService securityService;
 
-    @PostMapping("/fileList")
-    public ResponseEntity fileList(){
-        List<File> files = fileService.findAll(); // <File>
+    @GetMapping("/files")
+    public ResponseEntity<List<File>> fileList(Authentication authentication,
+            @RequestParam(defaultValue = "0") int page, //현재 페이지
+            @RequestParam(defaultValue = "10") int size //크기
+        ){
+        String userId = authentication.getName();
+        User user = securityService.findByUserId(userId);
+        Page<File> files = fileService.findAllByUser_IdOrderByInsertDtDesc(PageRequest.of(page, size), user.getId()); // <File>
         return new ResponseEntity(files, HttpStatus.OK);
     }
 
@@ -38,7 +52,11 @@ public class FileController {
 //    }
 
     @PostMapping("/fileUpload")
-    public ResponseEntity fileUpload(@RequestParam("file") List<MultipartFile> multipartFiles, @RequestParam("id") Long id){
+    public ResponseEntity fileUpload(@RequestParam("file") List<MultipartFile> multipartFiles
+            , Authentication authentication){
+        String userId = authentication.getName();
+        User user = securityService.findByUserId(userId);
+        Long id = user.getId();
         if(multipartFiles.isEmpty()){
             throw new RuntimeException("파일이 없습니다.");
         }
@@ -77,8 +95,11 @@ public class FileController {
 //    }
 
     @PostMapping("/folderCreate")
-    public ResponseEntity folderCreate(@RequestParam("userId") Long userId, @RequestParam("id") Long id){
-        fileService.folderCreate(userId, id);
+    public ResponseEntity folderCreate(@RequestParam("id") Long id, Authentication authentication){
+        String userId = authentication.getName();
+        User user = securityService.findByUserId(userId);
+        Long userIdx = user.getId();
+        fileService.folderCreate(userIdx, id);
         return new ResponseEntity("성공", HttpStatus.OK);
     }
 
